@@ -1,14 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>CET Arena</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
   :root{
     --paper:#f2f4ee; --paper-raised:#ffffff; --paper-sunken:#e7ebe1;
-    --ink:#1b231f; --ink-soft:#52605a; --ink-faint:#8a978f;
-    --line:rgba(27,35,31,.14); --line-strong:rgba(27,35,31,.28);
-    --accent:#2451c4; --accent-soft:#e4ebfb; --accent-ink:#0f2f8f;
-    --gold:#a4700f; --gold-soft:#f7ecd6;
-    --correct:#1f8a4c; --correct-soft:#e3f5ea;
-    --wrong:#c93f3f; --wrong-soft:#fbe7e7;
+    --ink:#171d1a; --ink-soft:#4a5750; --ink-faint:#7c8a82;
+    --line:rgba(23,29,26,.16); --line-strong:rgba(23,29,26,.30);
+    --accent:#3852f4; --accent-soft:#e2e7ff; --accent-ink:#1c2fb0;
+    --gold:#c17600; --gold-soft:#fbebd0;
+    --correct:#149355; --correct-soft:#dcf6e8;
+    --wrong:#dc2f2f; --wrong-soft:#fce1e1;
     --board:#16241d; --chalk:#eef3ea;
     --radius:14px; --radius-sm:8px;
     --shadow:0 1px 2px rgba(20,26,20,.06), 0 8px 24px -12px rgba(20,26,20,.18);
@@ -18,10 +23,10 @@
       --paper:#16241d; --paper-raised:#1e3227; --paper-sunken:#122019;
       --ink:#eef3ea; --ink-soft:#a9bdae; --ink-faint:#71857a;
       --line:rgba(238,243,234,.14); --line-strong:rgba(238,243,234,.26);
-      --accent:#7ea0ff; --accent-soft:rgba(126,160,255,.16); --accent-ink:#dfe8ff;
-      --gold:#e3ac4a; --gold-soft:rgba(227,172,74,.18);
-      --correct:#4ecb84; --correct-soft:rgba(78,203,132,.16);
-      --wrong:#ef6a6a; --wrong-soft:rgba(239,106,106,.16);
+      --accent:#89a8ff; --accent-soft:rgba(137,168,255,.18); --accent-ink:#e4ebff;
+      --gold:#f2b64f; --gold-soft:rgba(242,182,79,.20);
+      --correct:#3fe08e; --correct-soft:rgba(63,224,142,.18);
+      --wrong:#ff6f6f; --wrong-soft:rgba(255,111,111,.18);
       --board:#0f1a14; --chalk:#eef3ea;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
     }
@@ -66,6 +71,7 @@
   }
   .brand .tag{ font-size:11px; color:var(--chalk); opacity:.65; letter-spacing:.08em; text-transform:uppercase; }
   .theme-note{ font-size:11px; opacity:.55; }
+  @media (max-width:480px){ .theme-note{ display:none; } }
 
   /* ---------- Generic pieces ---------- */
   .stamp{
@@ -105,6 +111,7 @@
   /* ---------- Home ---------- */
   .hero{ text-align:center; padding:18px 0 6px; }
   .hero .display{ font-size:56px; line-height:.95; margin:0; }
+  @media (max-width:420px){ .hero .display{ font-size:42px; } }
   .hero p{ color:var(--ink-soft); font-size:15px; margin:10px 0 0; max-width:46ch; margin-inline:auto; }
 
   .section-title{
@@ -174,6 +181,36 @@
   .qcard{ margin-top:20px; padding:22px 22px 24px; }
   .qcard-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .subj-pill{ font-size:11px; text-transform:uppercase; letter-spacing:.07em; padding:4px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); font-weight:600; }
+  /* per-subject colors — one recognizable hue per exam subject, distinct from the
+     accent/correct/wrong palette so a subject badge never reads as feedback */
+  .subj-pill.hrgk{ background:#efe4fd; color:#6d28d9; }
+  .subj-pill.gk{ background:#d9f5f1; color:#0f766e; }
+  .subj-pill.maths{ background:#fde3ce; color:#c2410c; }
+  .subj-pill.science{ background:#dcedfd; color:#0369a1; }
+  .subj-pill.english{ background:#fbdfee; color:#be185d; }
+  .subj-pill.hindi{ background:#f7e6c8; color:#9a5b0a; }
+  .subj-pill.reasoning{ background:#e3e1fc; color:#4338ca; }
+  .subj-pill.computer{ background:#e5eaef; color:#334155; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      .subj-pill.hrgk{ background:rgba(167,139,250,.20); color:#cdbbfc; }
+      .subj-pill.gk{ background:rgba(45,212,191,.18); color:#7fe4d6; }
+      .subj-pill.maths{ background:rgba(251,146,60,.20); color:#fdba8c; }
+      .subj-pill.science{ background:rgba(56,189,248,.18); color:#a8e2fb; }
+      .subj-pill.english{ background:rgba(244,114,182,.18); color:#f7aed0; }
+      .subj-pill.hindi{ background:rgba(217,164,74,.20); color:#e8c78e; }
+      .subj-pill.reasoning{ background:rgba(129,140,248,.20); color:#bcc3fb; }
+      .subj-pill.computer{ background:rgba(148,163,184,.20); color:#cbd5e1; }
+    }
+  }
+  :root[data-theme="dark"] .subj-pill.hrgk{ background:rgba(167,139,250,.20); color:#cdbbfc; }
+  :root[data-theme="dark"] .subj-pill.gk{ background:rgba(45,212,191,.18); color:#7fe4d6; }
+  :root[data-theme="dark"] .subj-pill.maths{ background:rgba(251,146,60,.20); color:#fdba8c; }
+  :root[data-theme="dark"] .subj-pill.science{ background:rgba(56,189,248,.18); color:#a8e2fb; }
+  :root[data-theme="dark"] .subj-pill.english{ background:rgba(244,114,182,.18); color:#f7aed0; }
+  :root[data-theme="dark"] .subj-pill.hindi{ background:rgba(217,164,74,.20); color:#e8c78e; }
+  :root[data-theme="dark"] .subj-pill.reasoning{ background:rgba(129,140,248,.20); color:#bcc3fb; }
+  :root[data-theme="dark"] .subj-pill.computer{ background:rgba(148,163,184,.20); color:#cbd5e1; }
   .timer-ring{ position:relative; width:38px; height:38px; border-radius:50%; }
   .timer-ring svg{ transform:rotate(-90deg); width:38px; height:38px; }
   .timer-ring circle{ fill:none; stroke-width:3.5; }
@@ -185,7 +222,8 @@
   .opt{
     display:flex; align-items:center; gap:12px; text-align:left; width:100%;
     background:var(--paper-sunken); border:1.5px solid var(--line); border-radius:var(--radius-sm);
-    padding:11px 14px; cursor:pointer; font-size:14.5px; color:var(--ink); font-family:inherit;
+    padding:13px 14px; cursor:pointer; font-size:14.5px; color:var(--ink); font-family:inherit;
+    min-height:44px; /* comfortable thumb target on phones */
   }
   .opt:hover:not([disabled]){ border-color:var(--accent); }
   .opt .bubble{
@@ -202,6 +240,7 @@
   /* ---------- Results ---------- */
   .result-banner{ text-align:center; padding:20px 0 6px; }
   .result-banner .display{ font-size:44px; margin:0; }
+  @media (max-width:420px){ .result-banner .display{ font-size:34px; } }
   .result-banner.win .display{ color:var(--gold); }
   .final-scores{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px; }
   .final-card{ padding:18px; text-align:center; }
@@ -252,6 +291,8 @@
   }
   .toast.show{ opacity:1; }
 </style>
+</head>
+<body>
 
 <div class="ribbon">
   <div class="brand"><span class="mark">CET ARENA</span><span class="tag">HSSC CET Duels</span></div>
@@ -432,6 +473,11 @@ const DATA = {"Computer":[{"q":"Which of the following is an impact printer?","o
 const SUBJECTS = Object.keys(DATA);
 const SUBJECT_LABEL = {"HR GK":"Haryana GK","GK":"General Knowledge"};
 function subjLabel(s){ return SUBJECT_LABEL[s] || s; }
+const SUBJECT_CLASS = {
+  "HR GK":"hrgk", "GK":"gk", "Maths":"maths", "Science":"science",
+  "English":"english", "Hindi":"hindi", "Reasoning":"reasoning", "Computer":"computer"
+};
+function subjClass(s){ return SUBJECT_CLASS[s] || ""; }
 
 const MODES = [
   { key:"quick", name:"Quick Duel", desc:"10 Q, mixed subjects", total:10, weights:null },
@@ -757,6 +803,7 @@ function renderBattleQuestion(data){
   const q = resolveRef(refs[room.curIdx]);
   $("battleQCounter").textContent = "Q " + (room.curIdx+1) + "/" + refs.length;
   $("battleSubjPill").textContent = subjLabel(q.subject);
+  $("battleSubjPill").className = "subj-pill " + subjClass(q.subject);
   $("battleQText").textContent = q.q;
   const optsEl = $("battleOpts");
   optsEl.innerHTML = "";
@@ -864,6 +911,7 @@ function renderSoloQuestion(){
   const q = resolveRef(solo.refs[solo.curIdx]);
   $("soloQCounter").textContent = "Q " + (solo.curIdx+1) + "/" + solo.refs.length;
   $("soloSubjPill").textContent = subjLabel(q.subject);
+  $("soloSubjPill").className = "subj-pill " + subjClass(q.subject);
   $("soloQText").textContent = q.q;
   $("soloScore").textContent = solo.score;
   $("soloTrack").style.width = Math.round((solo.curIdx/solo.refs.length)*100)+"%";
@@ -948,7 +996,7 @@ function renderTapList(){
     ).join("");
     div.innerHTML =
       `<div class="tap-q">${i+1}. ${row.qText}</div>
-       <div class="tap-meta"><span class="subj-pill" style="padding:2px 8px;">${subjLabel(row.subject)}</span><span>${row.correct ? "Correct" : "Missed"}</span></div>
+       <div class="tap-meta"><span class="subj-pill ${subjClass(row.subject)}" style="padding:2px 8px;">${subjLabel(row.subject)}</span><span>${row.correct ? "Correct" : "Missed"}</span></div>
        <div class="tap-tags">${tagsHtml}</div>`;
     list.appendChild(div);
   });
@@ -1023,9 +1071,11 @@ async function showStudyScreen(){
     if(r.slow) bits.push(r.slow + " you took too long on");
     const div = document.createElement("div");
     div.className = "card study-card";
-    div.innerHTML = `<div class="subj">${subjLabel(r.subject)}</div><div class="stat">${bits.join(" · ")}</div>`;
+    div.innerHTML = `<div class="subj"><span class="subj-pill ${subjClass(r.subject)}">${subjLabel(r.subject)}</span></div><div class="stat">${bits.join(" · ")}</div>`;
     list.appendChild(div);
   });
 }
 $("btnStudyDone").addEventListener("click", ()=>{ showScreen("screen-home"); });
 </script>
+</body>
+</html>
