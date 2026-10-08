@@ -1047,7 +1047,8 @@ function pickSubject(cb){
   SUBJECTS.forEach(s=>{
     const b=document.createElement("button");
     b.className="bcard";
-    b.innerHTML=`<span class="nm">${esc(subjName(s))}</span><span class="meta">${DATA[s].length} ${esc(t("q"))}</span>`;
+    // bank size is our business, not the player's - name only
+    b.innerHTML=`<span class="nm">${esc(subjName(s))}</span>`;
     b.addEventListener("click", ()=>{ document.body.removeChild(wrap); cb(s); });
     list.appendChild(b);
   });
