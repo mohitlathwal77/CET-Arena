@@ -488,7 +488,7 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
   <div class="pad grow">
     <p class="lead" style="margin-top:16px" data-t="lobby_p">Share this code. The battle starts when they join.</p>
     <div class="code" id="lobbyCode">-----</div>
-    <button class="btn ghost sm" id="btnCopyCode" data-t="copy">Copy code</button>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn sm" id="btnShare">Invite a friend</button><button class="btn ghost sm" id="btnCopyCode" data-t="copy">Copy code</button></div>
     <div class="slots">
       <div class="slot filled" id="slotA"><div class="av">1</div><div class="sn"><b>—</b><small>—</small></div></div>
       <div class="slot" id="slotB"><div class="av">2</div><div class="sn"><b data-t="waiting">Waiting…</b><small data-t="not_joined">not joined yet</small></div></div>
@@ -1530,6 +1530,7 @@ $("btnStart").addEventListener("click", ()=>{
   const v = ($("nameInput").value||"").trim();
   if(!v){ toast(t("need_name")); $("nameInput").focus(); return; }
   P.name = v; savePlayer(); syncPlayer(); enterHome();
+  consumeJoinCode();            // arrived from an invite link - go to the battle
 });
 $("nameInput").addEventListener("keydown", e=>{ if(e.key==="Enter") $("btnStart").click(); });
 document.querySelectorAll("[data-back]").forEach(b=> b.addEventListener("click", ()=>{
@@ -1545,6 +1546,41 @@ $("btnCopyCode").addEventListener("click", ()=>{
   if(navigator.clipboard) navigator.clipboard.writeText(c).then(()=>toast(t("copied")), ()=>{});
   else toast(c);
 });
+
+/* One tap to invite. Native share sheet where the phone has one (Android/iOS),
+   WhatsApp web elsewhere. The link carries the code so the friend never types it. */
+function inviteLink(code){
+  return location.origin + location.pathname + "?join=" + code;
+}
+$("btnShare").addEventListener("click", async ()=>{
+  const code = $("lobbyCode").textContent.trim();
+  if(!code || code === "-----") return;
+  const url  = inviteLink(code);
+  const text = (LANG === "hi")
+    ? ("CET Arena पर मुझसे मुकाबला करो! कोड " + code + "\n" + url)
+    : ("Beat me on CET Arena. Code " + code + "\n" + url);
+  try{
+    if(navigator.share){ await navigator.share({ title:"CET Arena", text }); return; }
+  }catch(e){ /* user dismissed the sheet - fall through to WhatsApp */ }
+  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+});
+
+/* A friend arriving on ?join=CODE should land in the battle, not on a form. */
+function pendingJoinCode(){
+  const m = /[?&]join=([A-Za-z0-9]{3,8})/.exec(location.search);
+  return m ? m[1].toUpperCase() : null;
+}
+function consumeJoinCode(){
+  const code = pendingJoinCode();
+  if(!code) return false;
+  history.replaceState({}, "", location.origin + location.pathname);
+  showScreen("s-join");
+  openCodeEntry();
+  const inp = $("codeInput");
+  if(inp){ inp.value = code; inp.dispatchEvent(new Event("input", {bubbles:true})); }
+  setTimeout(()=>{ try{ joinDuel(); }catch(e){} }, 350);
+  return true;
+}
 $("btnResultHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
 $("btnStats").addEventListener("click", showStats);
 $("btnStatsHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
@@ -1586,8 +1622,15 @@ applyLang();
       + '<p style="opacity:.6;font-size:13px">' + String(err) + '</p></div>';
     return;
   }
-  if(P.name){ $("nameInput").value = P.name; enterHome(); }
-  else { showScreen("s-welcome"); }
+  if(P.name){
+    $("nameInput").value = P.name;
+    enterHome();
+    consumeJoinCode();              // invited friend goes straight into the battle
+  } else {
+    // no name yet: let them in first, then join automatically
+    showScreen("s-welcome");
+    if(pendingJoinCode()) toast("Enter your name to join the battle");
+  }
 })();
 
 </script>
