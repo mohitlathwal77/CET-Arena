@@ -508,6 +508,10 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
     </div>
   </div>
   <div class="progress"><i id="playProg" style="width:0%"></i></div>
+  <button id="btnLeave" title="Leave"
+    style="position:absolute;top:12px;right:12px;z-index:9;background:transparent;
+           border:0;color:var(--ink-faint);font-size:13px;font-weight:700;
+           padding:8px 10px;cursor:pointer">Leave</button>
   <div class="vsbar hidden" id="playVs">
     <div class="who"><span id="vsMeName">You</span><b class="num" id="vsMeScore">0</b><div class="track"><i id="vsMeBar" style="width:0%"></i></div></div>
     <div class="who" style="text-align:right"><span id="vsOppName">Opponent</span><b class="num" id="vsOppScore">0</b><div class="track opp"><i id="vsOppBar" style="width:0%"></i></div></div>
@@ -880,9 +884,9 @@ function applyRating(oppRating, oppRd, score){
 // mock:true       = five options and the CET blank penalty apply.
 // ==================================================================
 const MODES = {
-  quick:   { key:"quick",   en:"Quick Duel",      hi:"क्विक ड्यूल",       n:10, secs:20, cost:10, timeMode:"perQ", weights:null },
-  subject: { key:"subject", en:"Subject Battle",  hi:"विषय बैटल",         n:10, secs:20, cost:10, timeMode:"perQ", pick:true },
-  hrgk:    { key:"hrgk",    en:"Haryana GK Duel", hi:"हरियाणा जीके ड्यूल", n:15, secs:20, cost:15, timeMode:"perQ", only:"HR GK" },
+  quick:   { key:"quick",   en:"Quick 10",        hi:"क्विक 10",       n:10, secs:20, cost:10, timeMode:"perQ", weights:null },
+  subject: { key:"subject", en:"Subject Set",     hi:"विषय सेट",         n:10, secs:20, cost:10, timeMode:"perQ", pick:true },
+  hrgk:    { key:"hrgk",    en:"Haryana GK",      hi:"हरियाणा जीके", n:15, secs:20, cost:15, timeMode:"perQ", only:"HR GK" },
   groupD:  { key:"groupD",  en:"Group D Mock",    hi:"ग्रुप D मॉक",       n:20, secs:55, cost:20, timeMode:"bank", mock:true,
              weights:{"HR GK":5,"Science":3,"Maths":3,"GK":3,"Hindi":2,"English":2,"Reasoning":2} },
   groupC:  { key:"groupC",  en:"Group C Mock",    hi:"ग्रुप C मॉक",       n:20, secs:55, cost:20, timeMode:"bank", mock:true,
@@ -891,7 +895,7 @@ const MODES = {
              weights:{"HR GK":13,"Maths":7,"GK":6,"Reasoning":6,"English":6,"Hindi":6,"Science":3,"Computer":3} },
 };
 function modeName(m){ return m[LANG] || m.en; }
-const SOLO_MODES = ["quick","subject","hrgk"];
+const SOLO_MODES = ["quick","subject","hrgk","groupD","groupC","full"];
 const BATTLE_MODES = ["quick","subject","hrgk","groupD","groupC","full"];
 
 function buildQuestions(mode, subject){
@@ -974,27 +978,17 @@ async function pushAttempts(rows){
 // ==================================================================
 function renderHome(){
   $("homeHello").textContent = t("hi_user") + (P.name || "");
-  $("homeCoins").textContent = P.coins;
+  { const cw = $("homeCoins"); if(cw){ cw.textContent = P.coins;
+    const chip = cw.closest(".chip") || cw.parentElement;
+    if(chip) chip.style.display = "none"; } }
   $("homeTier").textContent = tierOf(P.rating);
   $("dbNote").classList.toggle("hidden", !!db);
 
+  // The bot battles used to live here. Battles are now friend-only.
   const bl = $("battleList"); bl.innerHTML = "";
-  BATTLE_MODES.forEach(k=>{
-    const m = MODES[k];
-    const afford = P.coins >= m.cost;
-    const secs = m.timeMode==="bank" ? Math.round(m.n*m.secs/60)+" min" : m.secs+"s/"+t("q").toLowerCase();
-    const b = document.createElement("button");
-    b.className = "bcard"; b.dataset.mode = k;
-    if(!afford) b.setAttribute("disabled","");
-    b.innerHTML =
-      `<span class="nm">${esc(modeName(m))}</span>` +
-      `<span class="cost">🪙 ${m.cost}</span>` +
-      `<span class="meta">${m.n} ${esc(t("q"))} · ${esc(secs)}${m.mock?" · CET rules":""}</span>`;
-    bl.appendChild(b);
-  });
   const friend = document.createElement("button");
   friend.className = "bcard"; friend.id = "btnFriend";
-  friend.innerHTML = `<span class="nm">${esc(t("friend_nm"))}</span><span class="cost">🪙 ${MODES.quick.cost}</span><span class="meta">${esc(t("friend_meta"))}</span>`;
+  friend.innerHTML = `<span class="nm">${esc(t("friend_nm"))}</span><span class="cost free">${esc(t("free"))}</span><span class="meta">${esc(t("friend_meta"))}</span>`;
   bl.appendChild(friend);
   const join = document.createElement("button");
   join.className = "bcard"; join.id = "btnJoinOpen";
@@ -1013,7 +1007,6 @@ function renderHome(){
     sl.appendChild(b);
   });
 
-  bl.querySelectorAll("[data-mode]").forEach(b=> b.addEventListener("click", ()=>startBattle(b.dataset.mode)));
   sl.querySelectorAll("[data-solo]").forEach(b=> b.addEventListener("click", ()=>startSolo(b.dataset.solo)));
   $("btnFriend").addEventListener("click", createDuel);
   $("btnJoinOpen").addEventListener("click", ()=>{ showScreen("s-join"); openCodeEntry(); });
@@ -1583,6 +1576,22 @@ function consumeJoinCode(){
 }
 $("btnResultHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
 $("btnStats").addEventListener("click", showStats);
+
+/* Leaving mid-round. A practice round just stops; a duel also tells the room so
+   the other player is not left staring at a frozen scoreboard. */
+$("btnLeave").addEventListener("click", async ()=>{
+  const msg = (LANG === "hi") ? "\u0907\u0938 \u0930\u093e\u0909\u0902\u0921 \u0938\u0947 \u092c\u093e\u0939\u0930 \u0928\u093f\u0915\u0932\u0947\u0902?"
+                              : "Leave this round?";
+  if(!confirm(msg)) return;
+  try{ if(G && G.timer) clearInterval(G.timer); }catch(e){}
+  try{
+    if(G && G.kind === "duel" && G.room && db){
+      await db.doc("rooms/" + G.room).update({ status:"done" });
+    }
+  }catch(e){}
+  G = null;
+  showScreen("s-home"); renderHome();
+});
 $("btnStatsHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
 $("btnBoard").addEventListener("click", ()=>{ boardTab="week"; showBoard(); });
 $("boardTabs").querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>{ boardTab=b.dataset.tab; showBoard(); }));
