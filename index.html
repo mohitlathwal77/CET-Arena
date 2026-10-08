@@ -400,6 +400,37 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 .bcard.big{padding:22px 18px}
 .bcard.big .nm{font-size:19px}
 .bcard.big .meta{margin-top:6px;line-height:1.4}
+
+/* ---- menu button + bottom sheet ---- */
+.menubtn{font-size:18px; line-height:1; padding:6px 11px}
+.sheet-wrap{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:60;
+  display:flex; align-items:flex-end; animation:fade .14s ease}
+.sheet{background:var(--surface); width:100%; max-width:520px; margin:0 auto;
+  border-radius:20px 20px 0 0; padding:10px 14px calc(18px + var(--safe-b));
+  animation:rise .18s cubic-bezier(.2,.8,.3,1)}
+.sheet .grab{width:38px; height:4px; border-radius:99px; background:var(--line-2);
+  margin:4px auto 14px}
+.sheet h3{font-size:15px; margin:2px 4px 10px; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:.07em}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{transform:translateY(14px)}to{transform:translateY(0)}}
+
+/* ---- the two home choices ---- */
+.bcard.big{padding:20px 18px; grid-template-columns:48px 1fr; gap:4px 14px;
+  align-items:start}
+.bcard.big .ico{grid-column:1; grid-row:1/3; width:48px; height:48px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center; font-size:23px;
+  background:var(--raised)}
+.bcard.big .nm{grid-column:2; font-size:18px; align-self:end}
+.bcard.big .meta{grid-column:2; font-size:13.5px; line-height:1.45; align-self:start}
+.bcard.big:active{transform:scale(.985)}
+#homeChoices{gap:12px; margin-top:4px}
+
+@media (max-width:380px){
+  .bcard.big{padding:17px 15px; grid-template-columns:42px 1fr}
+  .bcard.big .ico{width:42px; height:42px; font-size:20px}
+  .bcard.big .nm{font-size:16.5px}
+}
 </style>
 </head>
 <body>
@@ -428,6 +459,7 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
     <span class="pill tier" id="homeTier">—</span>
     <span class="pill coins"><span>🪙</span><span class="num" id="homeCoins">0</span></span>
     <button class="langbtn" id="btnLang">हिं</button>
+    <button class="langbtn menubtn" id="btnMenu" aria-label="Menu">⋮</button>
   </div>
   <div class="pad grow">
     <div class="note hidden" id="grantNote">
@@ -441,26 +473,17 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 
     <div class="stack" id="homeChoices">
       <button class="bcard big" id="btnGoPractice">
+        <span class="ico">✏️</span>
         <span class="nm">Practice solo</span>
         <span class="meta">Subject sets and full-length mocks. Free, unlimited.</span>
       </button>
       <button class="bcard big" id="btnGoFriend">
+        <span class="ico">⚔️</span>
         <span class="nm">Play a friend</span>
         <span class="meta">Share a code and battle live, question for question.</span>
       </button>
     </div>
 
-    <div class="section-head"><h3 data-t="more_h">Your progress</h3></div>
-    <div class="stack">
-      <button class="bcard" id="btnStats">
-        <span class="nm">My practice</span>
-        <span class="meta">Questions done and accuracy, subject by subject</span>
-      </button>
-      <button class="bcard" id="btnBoard">
-        <span class="nm" data-t="board_nm">Weekly board</span>
-        <span class="meta" data-t="board_meta">Where you stand this week</span>
-      </button>
-    </div>
     <div class="foot" id="footNote"></div>
   </div>
 </section>
@@ -1600,9 +1623,29 @@ function consumeJoinCode(){
   return true;
 }
 $("btnResultHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
+/* Bottom sheet: thumb-reachable on a phone, and keeps home down to the two
+   things you actually came to do. */
+function openMenu(){
+  const wrap = document.createElement("div");
+  wrap.className = "sheet-wrap";
+  wrap.innerHTML =
+    '<div class="sheet"><div class="grab"></div>'
+    + '<h3>Your progress</h3><div class="stack">'
+    + '<button class="bcard" id="mnStats"><span class="nm">My practice</span>'
+    + '<span class="meta">Questions done and accuracy, subject by subject</span></button>'
+    + '<button class="bcard" id="mnBoard"><span class="nm">' + esc(t("board_nm"))
+    + '</span><span class="meta">' + esc(t("board_meta")) + '</span></button>'
+    + '</div></div>';
+  document.body.appendChild(wrap);
+  const close = ()=>{ if(wrap.parentNode) document.body.removeChild(wrap); };
+  wrap.addEventListener("click", e=>{ if(e.target === wrap) close(); });
+  wrap.querySelector("#mnStats").addEventListener("click", ()=>{ close(); showStats(); });
+  wrap.querySelector("#mnBoard").addEventListener("click", ()=>{
+    close(); boardTab = "week"; showBoard(); });
+}
+$("btnMenu").addEventListener("click", openMenu);
 $("btnGoPractice").addEventListener("click", ()=>{ renderHome(); showScreen("s-practice"); });
 $("btnGoFriend").addEventListener("click", ()=>{ renderHome(); showScreen("s-friend"); });
-$("btnStats").addEventListener("click", showStats);
 
 /* Leaving mid-round. A practice round just stops; a duel also tells the room so
    the other player is not left staring at a frozen scoreboard. */
@@ -1620,7 +1663,6 @@ $("btnLeave").addEventListener("click", async ()=>{
   showScreen("s-home"); renderHome();
 });
 $("btnStatsHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
-$("btnBoard").addEventListener("click", ()=>{ boardTab="week"; showBoard(); });
 $("boardTabs").querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>{ boardTab=b.dataset.tab; showBoard(); }));
 
 /* Leaving the result without tagging still records the round — tagging is
@@ -1628,9 +1670,8 @@ $("boardTabs").querySelectorAll("button").forEach(b=> b.addEventListener("click"
 
 
 function enterHome(){
-  const g = claimDailyGrant();
-  $("grantNote").classList.toggle("hidden", !g);
-  if(g) $("grantMsg").textContent = t("grant_msg", g);
+  claimDailyGrant();                 // keeps the rating/streak maths happy
+  $("grantNote").classList.add("hidden");   // nothing costs coins any more
   showScreen("s-home"); renderHome();
 }
 
