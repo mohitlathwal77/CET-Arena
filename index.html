@@ -397,6 +397,9 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 
 .foot{padding:22px 16px calc(26px + var(--safe-b)); text-align:center; font-size:13.5px; color:var(--ink-3)}
 .hidden{display:none!important}
+.bcard.big{padding:22px 18px}
+.bcard.big .nm{font-size:19px}
+.bcard.big .meta{margin-top:6px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -436,29 +439,26 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
       <div><b data-t="offline_t">Live battles are offline</b><span data-t="offline_p">Solo practice and your study plan still work — they run on this device.</span></div>
     </div>
 
-    <div class="section-head">
-      <h3 data-t="battles_h">Battles</h3>
-      <span class="note-x muted" style="font-size:14px" data-t="battles_note">Costs coins · win them back</span>
+    <div class="stack" id="homeChoices">
+      <button class="bcard big" id="btnGoPractice">
+        <span class="nm">Practice solo</span>
+        <span class="meta">Subject sets and full-length mocks. Free, unlimited.</span>
+      </button>
+      <button class="bcard big" id="btnGoFriend">
+        <span class="nm">Play a friend</span>
+        <span class="meta">Share a code and battle live, question for question.</span>
+      </button>
     </div>
-    <div class="stack" id="battleList"></div>
-
-    <div class="section-head">
-      <h3 data-t="solo_h">Solo practice</h3>
-      <span class="muted" style="font-size:14px" data-t="solo_note">Always free, unlimited</span>
-    </div>
-    <div class="stack" id="soloList"></div>
 
     <div class="section-head"><h3 data-t="more_h">Your progress</h3></div>
     <div class="stack">
       <button class="bcard" id="btnStats">
         <span class="nm">My practice</span>
         <span class="meta">Questions done and accuracy, subject by subject</span>
-        <span class="cost free" data-t="free">Free</span>
       </button>
       <button class="bcard" id="btnBoard">
         <span class="nm" data-t="board_nm">Weekly board</span>
         <span class="meta" data-t="board_meta">Where you stand this week</span>
-        <span class="cost free" data-t="free">Free</span>
       </button>
     </div>
     <div class="foot" id="footNote"></div>
@@ -466,6 +466,30 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 </section>
 
 <!-- ============ JOIN ============ -->
+<section class="screen" id="s-practice">
+  <div class="bar">
+    <button class="back" data-back="s-home">&larr;</button>
+    <div class="title">Practice solo</div>
+  </div>
+  <div class="pad grow">
+    <p class="lead" style="margin-top:14px">Pick a set. Everything is free and
+      you can play as often as you like.</p>
+    <div class="stack" id="soloList"></div>
+  </div>
+</section>
+
+<section class="screen" id="s-friend">
+  <div class="bar">
+    <button class="back" data-back="s-home">&larr;</button>
+    <div class="title">Play a friend</div>
+  </div>
+  <div class="pad grow">
+    <p class="lead" style="margin-top:14px">One of you starts a battle and shares
+      the code. The other joins with it.</p>
+    <div class="stack" id="battleList"></div>
+  </div>
+</section>
+
 <section class="screen" id="s-join">
   <div class="bar">
     <button class="back" data-back="s-home">←</button>
@@ -1575,6 +1599,8 @@ function consumeJoinCode(){
   return true;
 }
 $("btnResultHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
+$("btnGoPractice").addEventListener("click", ()=>{ renderHome(); showScreen("s-practice"); });
+$("btnGoFriend").addEventListener("click", ()=>{ renderHome(); showScreen("s-friend"); });
 $("btnStats").addEventListener("click", showStats);
 
 /* Leaving mid-round. A practice round just stops; a duel also tells the room so
