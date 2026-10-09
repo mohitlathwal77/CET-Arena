@@ -482,6 +482,14 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 .bcard.mock .split{grid-column:1/-1; margin-top:8px; padding-top:9px;
   border-top:1px solid var(--line); color:var(--ink-3); font-size:12.5px;
   line-height:1.65}
+
+/* question screen: options sit under the question, Leave sits at the bottom of
+   the screen rather than floating directly under the last option */
+/* NB: no display rule here - #s-play would outrank .screen{display:none} and
+   the question screen would never hide. .screen already sets the column. */
+.leave-row{margin-top:auto; padding:22px 16px calc(22px + var(--safe-b));
+  text-align:center}
+.leave-row .btn{min-width:170px}
 </style>
 </head>
 <body>
@@ -553,8 +561,8 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
     <p class="lead" style="margin-top:14px">Pick a set. Everything is free and
       you can play as often as you like.</p>
     <div class="stack" id="soloList"></div>
-    <div class="foot">Both papers follow the official CET pattern: 100 questions
-      in 105 minutes, 25% Haryana GK.</div>
+    <div class="foot">Every set runs at the real paper's pace &mdash; 105 minutes
+      for 100 questions &mdash; on one clock, not per question.</div>
   </div>
 </section>
 
@@ -624,10 +632,9 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
   <div class="qtext" id="playQ">Loading…</div>
   <div class="opts" id="playOpts"></div>
   <div class="waitmsg hidden" id="playWait"></div>
-  <div style="padding:20px 16px 8px;text-align:center">
-    <button id="btnLeave" class="btn ghost sm" style="min-width:160px">Leave</button>
+  <div class="leave-row">
+    <button id="btnLeave" class="btn ghost sm">Leave</button>
   </div>
-  <div style="height:24px"></div>
 </section>
 
 <!-- ============ RESULT ============ -->
@@ -991,10 +998,13 @@ function applyRating(oppRating, oppRd, score){
 //                   so the student practises allocating their own time.
 // mock:true       = five options and the CET blank penalty apply.
 // ==================================================================
+/* One clock for the whole set, never per question - the real paper gives you
+   105 minutes for 100 questions, so every mode runs at that same 63s/question
+   rate (Quick 10 -> 10.5 min, Haryana GK 15 -> 15.75 min, and so on). */
 const MODES = {
-  quick:   { key:"quick",   en:"Quick 10",        hi:"क्विक 10",       n:10, secs:20, cost:10, timeMode:"perQ", weights:null },
-  subject: { key:"subject", en:"Subject Set",     hi:"विषय सेट",         n:10, secs:20, cost:10, timeMode:"perQ", pick:true },
-  hrgk:    { key:"hrgk",    en:"Haryana GK",      hi:"हरियाणा जीके", n:15, secs:20, cost:15, timeMode:"perQ", only:"HR GK" },
+  quick:   { key:"quick",   en:"Quick 10",        hi:"क्विक 10",       n:10, secs:63, cost:0, timeMode:"bank", weights:null },
+  subject: { key:"subject", en:"Subject Set",     hi:"विषय सेट",         n:10, secs:63, cost:0, timeMode:"bank", pick:true },
+  hrgk:    { key:"hrgk",    en:"Haryana GK",      hi:"हरियाणा जीके", n:15, secs:63, cost:0, timeMode:"bank", only:"HR GK" },
   /* HSSC CET Group D: 100 questions, 105 minutes. Split per the published
      pattern - Haryana GK 25, Maths 15, Science 15, GK 15, Reasoning 10,
      Hindi 10, English 10. */
@@ -1004,14 +1014,14 @@ const MODES = {
      (11+4), Reasoning 15, Maths 15, English 15, Hindi 15. */
   groupC:  { key:"groupC",  en:"Group C Mock",    hi:"ग्रुप C मॉक",       n:100, secs:63, cost:0, timeMode:"bank", mock:true,
              weights:{"HR GK":25,"GK":11,"Computer":4,"Reasoning":15,"Maths":15,"English":15,"Hindi":15} },
-  full:    { key:"full",    en:"Full Mock",       hi:"पूरा मॉक",          n:50, secs:63, cost:40, timeMode:"bank", mock:true,
+  full:    { key:"full",    en:"Full Mock",       hi:"पूरा मॉक",          n:50, secs:63, cost:0,  timeMode:"bank", mock:true,
              weights:{"HR GK":13,"Maths":7,"GK":6,"Reasoning":6,"English":6,"Hindi":6,"Science":3,"Computer":3} },
 };
 function modeName(m){ return m[LANG] || m.en; }
-const SOLO_MODES = ["groupD","groupC"]
+const SOLO_MODES = ["quick","subject","hrgk","groupD","groupC"]
 // modes offered for a friend battle - a 100-question duel is a big ask,
 // so a short one stays available
-const DUEL_MODES = ["quick","groupD","groupC"];
+const DUEL_MODES = ["quick","subject","hrgk","groupD","groupC"];
 const BATTLE_MODES = ["quick","subject","hrgk","groupD","groupC","full"];
 
 function buildQuestions(mode, subject){
@@ -1128,7 +1138,7 @@ function renderHome(){
     b.innerHTML =
       `<span class="nm">${esc(modeName(m))}</span>` +
       `<span class="cost free">${esc(t("free"))}</span>` +
-      `<span class="meta">${m.n} ${esc(t("q"))}${mins?" · "+mins+" min":""} · CET pattern</span>` +
+      `<span class="meta">${m.n} ${esc(t("q"))}${mins?" · "+mins+" min":""}${m.mock?" · CET pattern":""}</span>` +
       (split ? `<span class="split">${split}</span>` : "");
     sl.appendChild(b);
   });
@@ -1579,8 +1589,7 @@ function pickDuelMode(cb){
   const list = wrap.querySelector("#duelModes");
   DUEL_MODES.forEach(k=>{
     const m = MODES[k];
-    const mins = m.timeMode === "bank" ? Math.round(m.n*m.secs/60) + " min"
-                                       : m.secs + "s " + t("q").toLowerCase();
+    const mins = Math.round(m.n*m.secs/60) + " min";
     const b = document.createElement("button");
     b.className = "bcard";
     b.innerHTML = '<span class="nm">' + esc(modeName(m)) + '</span>'
