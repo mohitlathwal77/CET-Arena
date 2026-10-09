@@ -490,6 +490,69 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 .leave-row{margin-top:auto; padding:22px 16px calc(22px + var(--safe-b));
   text-align:center}
 .leave-row .btn{min-width:170px}
+
+/* ---- my practice ---- */
+.bars{display:flex; flex-direction:column; gap:12px}
+.barrow .bl{display:flex; justify-content:space-between; align-items:baseline;
+  gap:10px; font-size:14.5px; margin-bottom:5px}
+.barrow .bl span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap}
+.barrow .bl b{font-variant-numeric:tabular-nums}
+.btrack{height:7px; border-radius:99px; background:var(--raised); overflow:hidden}
+.btrack i{display:block; height:100%; background:var(--accent); border-radius:99px}
+.barrow .bn{font-size:12.5px; color:var(--ink-3); margin-top:4px}
+.bcard.testcard{grid-template-columns:1fr auto; row-gap:3px}
+.testcard .score{font-weight:800; font-size:16px; font-variant-numeric:tabular-nums}
+.testcard .score.good{color:var(--correct)}
+.testcard .score.mid{color:var(--gold)}
+.testcard .score.low{color:var(--wrong)}
+
+/* ---- per-question review ---- */
+.revnote{color:var(--ink-3); font-size:13.5px; margin:12px 2px 18px; text-align:center}
+.qrev{background:var(--surface); border:1px solid var(--line);
+  border-left:3px solid var(--line-2); border-radius:var(--r);
+  padding:14px 14px 12px; margin-bottom:12px}
+.qrev.right{border-left-color:var(--correct)}
+.qrev.wrong{border-left-color:var(--wrong)}
+.qrev.blank{border-left-color:var(--ink-3)}
+.qrh{display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;
+  text-transform:uppercase; letter-spacing:.06em; font-weight:700}
+.qrh .qn{color:var(--ink-3)}
+.qrh .qs{color:var(--ink-3); font-weight:600; text-transform:none; letter-spacing:0;
+  font-size:12.5px}
+.qrh .qv{margin-left:auto}
+.qrev.right .qv{color:var(--correct)} .qrev.wrong .qv{color:var(--wrong)}
+.qrev.blank .qv{color:var(--ink-3)}
+.qq{font-size:16px; line-height:1.45; margin-bottom:10px}
+.qopts{display:flex; flex-direction:column; gap:6px}
+.qopt{display:grid; grid-template-columns:22px 1fr auto; gap:9px; align-items:center;
+  padding:8px 10px; border-radius:10px; background:var(--raised);
+  font-size:14.5px; line-height:1.35}
+.qopt .k{color:var(--ink-3); font-weight:700; font-size:12.5px}
+.qopt.ok{background:rgba(20,147,85,.16); color:var(--correct)}
+.qopt.bad{background:rgba(220,47,47,.14); color:var(--wrong)}
+.qopt .mk{font-weight:800}
+.qwhy{margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
+  font-size:14px; line-height:1.55; color:var(--ink-2)}
+.qwhy b{display:block; font-size:11.5px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--ink-3); margin-bottom:3px}
+
+/* hamburger */
+.menubtn{display:inline-flex; flex-direction:column; justify-content:center;
+  align-items:center; gap:3.5px; width:38px; height:34px; padding:0}
+.menubtn span{display:block; width:16px; height:2px; border-radius:2px;
+  background:var(--ink-2)}
+
+#homeStats{margin-top:22px}
+#homeStats .section-head{display:flex; align-items:baseline; justify-content:space-between}
+.linkbtn{background:none; border:0; color:var(--accent); font-size:14px;
+  font-weight:700; padding:0}
+.lastrow{margin-top:10px; color:var(--ink-3); font-size:13.5px}
+.lastrow b{color:var(--ink-2)}
+.emptytip{margin-top:26px; padding:16px 16px; border-radius:var(--r);
+  border:1px dashed var(--line-2); background:var(--surface)}
+.emptytip b{display:block; font-size:15px; margin-bottom:3px}
+.emptytip span{color:var(--ink-3); font-size:13.5px; line-height:1.5}
 </style>
 </head>
 <body>
@@ -515,10 +578,9 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
 <section class="screen" id="s-home">
   <div class="bar">
     <div class="title" id="homeHello">Hi</div>
-    <span class="pill tier" id="homeTier">—</span>
-    <span class="pill coins"><span>🪙</span><span class="num" id="homeCoins">0</span></span>
+        <span class="pill coins"><span>🪙</span><span class="num" id="homeCoins">0</span></span>
     <button class="langbtn" id="btnLang">हिं</button>
-    <button class="langbtn menubtn" id="btnMenu" aria-label="Menu">⋮</button>
+    <button class="langbtn menubtn" id="btnMenu" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
   <div class="pad grow">
     <div class="note hidden" id="grantNote">
@@ -546,6 +608,9 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
         <span class="meta">Share a code and battle live, question for question.</span>
       </button>
     </div>
+
+    <!-- fills the lower half with the player's own numbers instead of padding -->
+    <div id="homeStats"></div>
 
     <div class="foot" id="footNote"></div>
   </div>
@@ -671,6 +736,14 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
   </div>
   <div class="pad grow" id="statsBody"></div>
   <div class="dock"><button class="btn ghost" id="btnStatsHome">Back to home</button></div>
+</section>
+
+<section class="screen" id="s-review">
+  <div class="bar">
+    <button class="back" id="btnReviewBack">&larr;</button>
+    <div class="title" id="reviewTitle">Review</div>
+  </div>
+  <div class="pad grow" id="reviewBody"></div>
 </section>
 
 <section class="screen" id="s-board">
@@ -898,7 +971,8 @@ function weekKey(){
 const STORE_KEY = "cet_player_v2";
 const DEFAULT_PLAYER = {
   id:null, name:"", coins:120, rating:1500, rd:350, vol:0.06,
-  battles:0, wins:0, lastGrant:null, earnedToday:0, earnedDay:null, history:[]
+  battles:0, wins:0, lastGrant:null, earnedToday:0, earnedDay:null,
+  history:[], tests:[]
 };
 let P = loadPlayer();
 function loadPlayer(){
@@ -911,6 +985,7 @@ function loadPlayer(){
     localStorage.setItem("cet_player_id", p.id);
   }
   if(!Array.isArray(p.history)) p.history = [];
+  if(!Array.isArray(p.tests)) p.tests = [];
   return p;
 }
 function savePlayer(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(P)); }catch(e){} }
@@ -1107,7 +1182,7 @@ function renderHome(){
   { const cw = $("homeCoins"); if(cw){ cw.textContent = P.coins;
     const chip = cw.closest(".chip") || cw.parentElement;
     if(chip) chip.style.display = "none"; } }
-  $("homeTier").textContent = tierOf(P.rating);
+  // tier pill removed - rank is not the point of a free practice app
   $("dbNote").classList.toggle("hidden", !!db);
 
   // The bot battles used to live here. Battles are now friend-only.
@@ -1144,8 +1219,37 @@ function renderHome(){
   });
 
   sl.querySelectorAll("[data-solo]").forEach(b=> b.addEventListener("click", ()=>startSolo(b.dataset.solo)));
+  renderHomeStats();
   $("btnFriend").addEventListener("click", createDuel);
   $("btnJoinOpen").addEventListener("click", ()=>{ showScreen("s-join"); openCodeEntry(); });
+}
+
+function renderHomeStats(){
+  const el = $("homeStats"); if(!el) return;
+  const hist = P.history || [], tests = P.tests || [];
+  if(!hist.length){
+    el.innerHTML = '<div class="emptytip">'
+      + '<b>Start anywhere.</b>'
+      + '<span>Finish a set and your score, accuracy and every explanation '
+      + 'land here.</span></div>';
+    return;
+  }
+  const ok = hist.filter(x=>x.correct).length;
+  const pct = Math.round(ok/hist.length*100);
+  const last = tests[0];
+  el.innerHTML =
+    '<div class="section-head"><h3>Your practice</h3>'
+    + '<button class="linkbtn" id="homeSeeAll">See all</button></div>'
+    + '<div class="tiles">'
+    + '<div class="tile"><div class="v num">' + tests.length + '</div><div class="l">Sets</div></div>'
+    + '<div class="tile"><div class="v num">' + hist.length + '</div><div class="l">Questions</div></div>'
+    + '<div class="tile"><div class="v num">' + pct + '%</div><div class="l">Accuracy</div></div>'
+    + '</div>'
+    + (last ? '<div class="lastrow">Last: <b>' + esc(last.modeName||last.mode)
+              + '</b> · ' + last.right + '/' + last.n + ' · '
+              + fmtWhen(last.ts) + '</div>' : '');
+  const sa = $("homeSeeAll");
+  if(sa) sa.addEventListener("click", showStats);
 }
 
 function pickSubject(cb){
@@ -1366,52 +1470,149 @@ function finishGame(){
 function recordRound(){
   if(G._logged) return;
   G._logged = true;
-  const now = Date.now(); const rows = [];
+  const now = Date.now(); const rows = []; const items = [];
   G.refs.forEach((ref,i)=>{
     const ans = G.answers[i];
+    const { row, a } = resolve(ref);
     P.history.push({ ts:now, subject:ref.subject, correct:!!(ans&&ans.correct),
       ms:ans?ans.ms:0, blank:!ans||!!ans.timedOut, mode:G.mode.key });
     rows.push({ player_id:P.id, room_code:G.room||null, subject:ref.subject,
       correct:!!(ans&&ans.correct),
-      // tagging is gone, so there is no reason to record. Needs the one-line
-      // migration in FIX-ATTEMPTS.sql (tag made nullable) or the insert is
-      // rejected - harmless either way, local stats do not depend on it.
+      // tagging is gone; needs FIX-ATTEMPTS.sql to make this column nullable
       tag:null });
+    // A snapshot, not a pointer into DATA: the bank is regenerated from time to
+    // time and indexes shift, which would silently show the wrong question in
+    // an old review.
+    items.push({
+      s: ref.subject,
+      q: qText(row),
+      o: qOpts(row),
+      a: a,
+      c: ans && !ans.skipped && ans.choice !== null && ans.choice !== undefined
+         ? ans.choice : null,
+      e: row.e || ""
+    });
   });
   if(P.history.length > 3000) P.history = P.history.slice(-3000);
+
+  const right = items.filter(x=>x.c === x.a).length;
+  const blank = items.filter(x=>x.c === null).length;
+  P.tests.unshift({
+    ts: now, mode: G.mode.key, modeName: modeName(G.mode),
+    subject: G.subject || null, kind: G.kind,
+    n: items.length, right, blank, wrong: items.length - right - blank,
+    items
+  });
+  // a 100-question snapshot is ~40 KB; keep the last 15 so localStorage
+  // (about 5 MB) is never the thing that breaks
+  if(P.tests.length > 15) P.tests = P.tests.slice(0, 15);
+
   savePlayer(); pushAttempts(rows);
 }
 
+function fmtWhen(ts){
+  const d = new Date(ts), now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const hh = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  if(sameDay) return "Today " + hh;
+  const y = new Date(now.getTime() - 86400000);
+  if(d.toDateString() === y.toDateString()) return "Yesterday " + hh;
+  return d.toLocaleDateString(undefined,{day:"numeric",month:"short"}) + " " + hh;
+}
+
 function showStats(){
-  const hist = P.history || [];
+  const tests = P.tests || [], hist = P.history || [];
   const body = $("statsBody");
-  if(!hist.length){
-    body.innerHTML = '<p class="lead" style="margin-top:18px">'
-      + 'No practice yet. Play a round and your numbers appear here.</p>';
+  if(!tests.length && !hist.length){
+    body.innerHTML = '<p class="lead" style="margin-top:20px">'
+      + 'Nothing yet. Finish a set and it shows up here with every question, '
+      + 'your answer and the explanation.</p>';
     showScreen("s-stats"); return;
   }
-  const by = {};
-  hist.forEach(x=>{
-    const s = by[x.subject] || (by[x.subject] = { n:0, ok:0 });
-    s.n++; if(x.correct) s.ok++;
-  });
+
+  // --- overall ---
   const n = hist.length, ok = hist.filter(x=>x.correct).length;
-  const pct = v=> Math.round(v*100) + "%";
-  const rows = Object.entries(by)
-    .sort((a,b)=> b[1].n - a[1].n)
-    .map(([s,v])=>
-      `<div class="rev"><div class="rq">${esc(subjName(s))}</div>`
-      + `<div class="ra"><span class="lbl">done</span><span class="val">${v.n}</span></div>`
-      + `<div class="ra"><span class="lbl">accuracy</span>`
-      + `<span class="val ${v.ok/v.n>=0.6?"right":""}">${pct(v.ok/v.n)}</span></div></div>`)
-    .join("");
-  body.innerHTML =
-    `<div class="tiles">`
-    + `<div class="tile"><div class="v num">${n}</div><div class="l">Questions</div></div>`
-    + `<div class="tile"><div class="v num">${pct(ok/n)}</div><div class="l">Accuracy</div></div>`
-    + `<div class="tile"><div class="v num">${Object.keys(by).length}</div><div class="l">Subjects</div></div></div>`
-    + `<div class="section-head pad"><h3>By subject</h3></div>` + rows;
+  const pct = v => Math.round(v*100) + "%";
+  const tile = (v,l) => '<div class="tile"><div class="v num">' + v
+                      + '</div><div class="l">' + l + '</div></div>';
+  let html = '<div class="tiles">'
+    + tile(tests.length, "Sets taken")
+    + tile(n, "Questions")
+    + tile(n ? pct(ok/n) : "\u2014", "Accuracy")
+    + '</div>';
+
+  // --- by subject ---
+  const by = {};
+  hist.forEach(x=>{ const s = by[x.subject] || (by[x.subject]={n:0,ok:0}); s.n++; if(x.correct) s.ok++; });
+  const subs = Object.entries(by).sort((a,b)=>b[1].n-a[1].n);
+  if(subs.length){
+    html += '<div class="section-head"><h3>By subject</h3></div><div class="bars">';
+    subs.forEach(([s,v])=>{
+      const p = Math.round(v.ok/v.n*100);
+      html += '<div class="barrow"><div class="bl"><span>' + esc(subjName(s))
+        + '</span><b>' + p + '%</b></div>'
+        + '<div class="btrack"><i style="width:' + p + '%"></i></div>'
+        + '<div class="bn">' + v.ok + ' / ' + v.n + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // --- the sets themselves ---
+  if(tests.length){
+    html += '<div class="section-head"><h3>Your sets</h3></div><div class="stack">';
+    tests.forEach((tst,i)=>{
+      const p = tst.n ? Math.round(tst.right/tst.n*100) : 0;
+      html += '<button class="bcard testcard" data-test="' + i + '">'
+        + '<span class="nm">' + esc(tst.modeName || tst.mode)
+        + (tst.subject ? " \u00b7 " + esc(subjName(tst.subject)) : "") + '</span>'
+        + '<span class="score ' + (p>=60?"good":p>=35?"mid":"low") + '">' + p + '%</span>'
+        + '<span class="meta">' + fmtWhen(tst.ts) + ' \u00b7 ' + tst.right + '/' + tst.n
+        + ' right' + (tst.blank ? ' \u00b7 ' + tst.blank + ' blank' : '') + '</span>'
+        + '</button>';
+    });
+    html += '</div>';
+  }
+  body.innerHTML = html;
+  body.querySelectorAll("[data-test]").forEach(b=>
+    b.addEventListener("click", ()=> showReview(+b.dataset.test)));
   showScreen("s-stats");
+}
+
+function showReview(i){
+  const tst = (P.tests||[])[i];
+  if(!tst) return;
+  $("reviewTitle").textContent = (tst.modeName || tst.mode);
+  const pctv = tst.n ? Math.round(tst.right/tst.n*100) : 0;
+  let html = '<div class="tiles" style="margin-top:14px">'
+    + '<div class="tile"><div class="v num">' + tst.right + '</div><div class="l">Right</div></div>'
+    + '<div class="tile"><div class="v num">' + tst.wrong + '</div><div class="l">Wrong</div></div>'
+    + '<div class="tile"><div class="v num">' + tst.blank + '</div><div class="l">Blank</div></div>'
+    + '</div>'
+    + '<div class="revnote">' + fmtWhen(tst.ts) + ' \u00b7 ' + pctv + '% \u00b7 '
+    + tst.n + ' questions</div>';
+
+  tst.items.forEach((it,qi)=>{
+    const right = it.c === it.a, blank = it.c === null;
+    const state = blank ? "blank" : right ? "right" : "wrong";
+    const label = blank ? "Not answered" : right ? "Correct" : "Wrong";
+    html += '<div class="qrev ' + state + '">'
+      + '<div class="qrh"><span class="qn">Q' + (qi+1) + '</span>'
+      + '<span class="qs">' + esc(subjName(it.s)) + '</span>'
+      + '<span class="qv">' + label + '</span></div>'
+      + '<div class="qq">' + esc(it.q) + '</div><div class="qopts">';
+    it.o.forEach((o,oi)=>{
+      const cls = oi === it.a ? "ok" : (oi === it.c ? "bad" : "");
+      const mark = oi === it.a ? "\u2713" : (oi === it.c ? "\u2717" : "");
+      html += '<div class="qopt ' + cls + '"><span class="k">' + "ABCD"[oi]
+            + '</span><span class="tx">' + esc(o) + '</span>'
+            + '<span class="mk">' + mark + '</span></div>';
+    });
+    html += '</div>';
+    if(it.e) html += '<div class="qwhy"><b>Why</b>' + esc(it.e) + '</div>';
+    html += '</div>';
+  });
+  $("reviewBody").innerHTML = html;
+  showScreen("s-review");
 }
 
 function showResult(){
@@ -1795,18 +1996,14 @@ function openMenu(){
   wrap.className = "sheet-wrap";
   wrap.innerHTML =
     '<div class="sheet"><div class="grab"></div>'
-    + '<h3>Your progress</h3><div class="stack">'
+    + '<div class="stack">'
     + '<button class="bcard" id="mnStats"><span class="nm">My practice</span>'
-    + '<span class="meta">Questions done and accuracy, subject by subject</span></button>'
-    + '<button class="bcard" id="mnBoard"><span class="nm">' + esc(t("board_nm"))
-    + '</span><span class="meta">' + esc(t("board_meta")) + '</span></button>'
+    + '<span class="meta">Every set you have taken, with answers and explanations</span></button>'
     + '</div></div>';
   document.body.appendChild(wrap);
   const close = ()=>{ if(wrap.parentNode) document.body.removeChild(wrap); };
   wrap.addEventListener("click", e=>{ if(e.target === wrap) close(); });
   wrap.querySelector("#mnStats").addEventListener("click", ()=>{ close(); showStats(); });
-  wrap.querySelector("#mnBoard").addEventListener("click", ()=>{
-    close(); boardTab = "week"; showBoard(); });
 }
 $("btnMenu").addEventListener("click", openMenu);
 $("btnGoPractice").addEventListener("click", ()=>{ renderHome(); showScreen("s-practice"); });
@@ -1828,6 +2025,7 @@ $("btnLeave").addEventListener("click", async ()=>{
   G = null;
   showScreen("s-home"); renderHome();
 });
+$("btnReviewBack").addEventListener("click", ()=> showStats());
 $("btnStatsHome").addEventListener("click", ()=>{ showScreen("s-home"); renderHome(); });
 $("boardTabs").querySelectorAll("button").forEach(b=> b.addEventListener("click", ()=>{ boardTab=b.dataset.tab; showBoard(); }));
 
