@@ -431,6 +431,57 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
   .bcard.big .ico{width:42px; height:42px; font-size:20px}
   .bcard.big .nm{font-size:16.5px}
 }
+
+/* ===================== mobile layout pass ===================== */
+
+/* Screens are columns: content grows, the footer sits at the bottom instead of
+   floating wherever the content happens to end. */
+.screen.active{display:flex}
+.screen > .pad.grow{display:flex; flex-direction:column}
+.screen > .foot, .pad.grow > .foot{margin-top:auto}
+
+/* home */
+.hero{padding:26px 2px 20px}
+.hero h2{font-size:26px; line-height:1.25; font-weight:800; letter-spacing:-.02em}
+.hero p{margin:9px 0 0; color:var(--ink-3); font-size:15px; line-height:1.5}
+#homeChoices{gap:13px}
+
+/* list screens: a touch more room so two cards do not look stranded */
+#soloList, #battleList{gap:12px}
+#s-practice .lead, #s-friend .lead{margin-bottom:20px}
+
+/* the timer has to hold "104:58" as happily as "20" */
+.timer{width:auto; min-width:46px; height:46px; padding:0 2px}
+.timer svg{position:absolute; inset:0; width:100%; height:100%}
+.timer b{font-size:16px; font-variant-numeric:tabular-nums; padding:0 7px}
+/* A ring cannot hold "104:58". On the long bank timer drop the ring and use a
+   pill instead - question progress is already shown by the bar underneath. */
+.timer.wide{min-width:0; width:auto; height:30px; background:var(--raised);
+  border:1px solid var(--line-2); border-radius:999px; padding:0 12px}
+.timer.wide svg{display:none}
+.timer.wide b{font-size:14.5px; padding:0}
+.timer.wide.low{background:rgba(220,47,47,.14); border-color:rgba(220,47,47,.5)}
+
+/* question screen rhythm */
+.qtext{padding:18px 16px 4px; line-height:1.45}
+.opts{padding:0 16px; display:flex; flex-direction:column; gap:10px}
+#s-play .opts .opt{min-height:54px}
+
+@media (max-width:380px){
+  .hero{padding:20px 2px 16px}
+  .hero h2{font-size:23px}
+  .bcard.big{padding:16px 14px}
+}
+@media (min-height:760px){
+  .hero{padding:34px 2px 24px}
+}
+
+/* mock cards carry the paper's subject split */
+.bcard.mock{grid-template-columns:1fr auto; row-gap:4px}
+.bcard.mock .nm{font-size:17px}
+.bcard.mock .split{grid-column:1/-1; margin-top:8px; padding-top:9px;
+  border-top:1px solid var(--line); color:var(--ink-3); font-size:12.5px;
+  line-height:1.65}
 </style>
 </head>
 <body>
@@ -471,6 +522,10 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
       <div><b data-t="offline_t">Live battles are offline</b><span data-t="offline_p">Solo practice and your study plan still work — they run on this device.</span></div>
     </div>
 
+    <div class="hero">
+      <h2>What do you want<br>to do today?</h2>
+      <p id="heroLine">Free HSSC CET practice. No ads, nothing locked.</p>
+    </div>
     <div class="stack" id="homeChoices">
       <button class="bcard big" id="btnGoPractice">
         <span class="ico">✏️</span>
@@ -498,6 +553,8 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
     <p class="lead" style="margin-top:14px">Pick a set. Everything is free and
       you can play as often as you like.</p>
     <div class="stack" id="soloList"></div>
+    <div class="foot">Both papers follow the official CET pattern: 100 questions
+      in 105 minutes, 25% Haryana GK.</div>
   </div>
 </section>
 
@@ -510,6 +567,8 @@ html[lang="hi"] .qtext{font-size:20.5px; line-height:1.8}
     <p class="lead" style="margin-top:14px">One of you starts a battle and shares
       the code. The other joins with it.</p>
     <div class="stack" id="battleList"></div>
+    <div class="foot">Both of you answer the same questions at the same time.
+      Highest score wins.</div>
   </div>
 </section>
 
@@ -1049,18 +1108,28 @@ function renderHome(){
   bl.appendChild(friend);
   const join = document.createElement("button");
   join.className = "bcard"; join.id = "btnJoinOpen";
-  join.innerHTML = `<span class="nm">${esc(t("join_nm"))}</span><span class="cost free">${esc(t("free"))}</span><span class="meta">—</span>`;
+  join.innerHTML = `<span class="nm">${esc(t("join_nm"))}</span>`
+  + `<span class="cost free">${esc(t("free"))}</span>`
+  + `<span class="meta">${LANG==="hi" ? "दोस्त का 5-अक्षर कोड डालें" : "Enter your friend's 5-letter code"}</span>`;
   bl.appendChild(join);
 
   const sl = $("soloList"); sl.innerHTML = "";
   SOLO_MODES.forEach(k=>{
     const m = MODES[k];
+    const mins = m.timeMode === "bank" ? Math.round(m.n*m.secs/60) : null;
+    // the subject split is the useful thing about a mock - show it rather than
+    // leaving the card (and the screen) half empty
+    const split = m.weights
+      ? Object.entries(m.weights).sort((a,b)=>b[1]-a[1])
+          .map(([s,n])=>esc(subjName(s))+" "+n).join("  ·  ")
+      : "";
     const b = document.createElement("button");
-    b.className = "bcard"; b.dataset.solo = k;
+    b.className = "bcard mock"; b.dataset.solo = k;
     b.innerHTML =
       `<span class="nm">${esc(modeName(m))}</span>` +
       `<span class="cost free">${esc(t("free"))}</span>` +
-      `<span class="meta">${m.n} ${esc(t("q"))} · ${esc(t("solo_note"))}</span>`;
+      `<span class="meta">${m.n} ${esc(t("q"))}${mins?" · "+mins+" min":""} · CET pattern</span>` +
+      (split ? `<span class="split">${split}</span>` : "");
     sl.appendChild(b);
   });
 
@@ -1149,7 +1218,10 @@ function paintTimer(left, total, isBank){
   const el = $("playTimer"), ring = $("playRing"), C = 2*Math.PI*20;
   ring.style.strokeDasharray = C;
   ring.style.strokeDashoffset = C*(1 - Math.max(0,left)/total);
-  $("playTime").textContent = isBank ? (Math.floor(left/60)+":"+String(Math.max(0,left%60)).padStart(2,"0")) : Math.max(0,left);
+  const txt = isBank ? (Math.floor(left/60)+":"+String(Math.max(0,left%60)).padStart(2,"0")) : String(Math.max(0,left));
+  $("playTime").textContent = txt;
+  el.classList.toggle("wide", txt.length > 3);   // a long clock needs more room
+
   el.classList.toggle("low", isBank ? left<=30 : left<=5);
 }
 function startQTimer(){
@@ -1290,7 +1362,11 @@ function recordRound(){
     P.history.push({ ts:now, subject:ref.subject, correct:!!(ans&&ans.correct),
       ms:ans?ans.ms:0, blank:!ans||!!ans.timedOut, mode:G.mode.key });
     rows.push({ player_id:P.id, room_code:G.room||null, subject:ref.subject,
-      correct:!!(ans&&ans.correct) });
+      correct:!!(ans&&ans.correct),
+      // tagging is gone, so there is no reason to record. Needs the one-line
+      // migration in FIX-ATTEMPTS.sql (tag made nullable) or the insert is
+      // rejected - harmless either way, local stats do not depend on it.
+      tag:null });
   });
   if(P.history.length > 3000) P.history = P.history.slice(-3000);
   savePlayer(); pushAttempts(rows);
